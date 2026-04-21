@@ -1,0 +1,36 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.code-workspace
+
+# Large VM files (never commit these to git)
+*.vmdk
+*.vmx
+*.ovf
+*.ova
+*.zip
+*.7z
+*.tar.gz
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Note: Screenshots (PNG/JPG) ARE tracked by git
+# Add your actual screenshots to screenshots/task1-4/ folders

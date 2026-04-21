@@ -1,0 +1,192 @@
+################################################################################
+#                    FORTIGATE CLI COMMANDS REFERENCE                          #
+#                 Firewall Security Lab — Advanced Network Security            #
+#                 Muhammad Ahmad | 25I-7705 | NUCES Islamabad                  #
+################################################################################
+
+# ============================================================================
+# SECTION 1: INITIAL LOGIN
+# ============================================================================
+# Default credentials on first boot:
+#   Username: admin
+#   Password: (blank — press Enter)
+# You will be forced to set a new password on first login.
+
+# ============================================================================
+# SECTION 2: INTERFACE INSPECTION
+# ============================================================================
+
+# View all interfaces with current status
+get system interface
+
+# Show full interface configuration
+show system interface
+
+# View a specific interface
+show system interface port1
+
+# ============================================================================
+# SECTION 3: MANAGEMENT INTERFACE CONFIGURATION (port1)
+# ============================================================================
+
+config system interface
+    edit port1
+        set mode static
+        set ip 192.168.139.131 255.255.255.0
+        set allowaccess http https telnet ssh ping
+    end
+
+# ============================================================================
+# SECTION 4: WAN INTERFACE CONFIGURATION (port2)
+# ============================================================================
+
+config system interface
+    edit port2
+        set mode static
+        set ip 192.168.118.2 255.255.255.0
+        set allowaccess ping https ssh
+        set role wan
+    end
+
+# ============================================================================
+# SECTION 5: LAN INTERFACE CONFIGURATION (port3)
+# ============================================================================
+
+config system interface
+    edit port3
+        set mode static
+        set ip 192.168.205.2 255.255.255.0
+        set allowaccess ping https ssh
+        set role lan
+    end
+
+# ============================================================================
+# SECTION 6: DEFAULT ROUTE CONFIGURATION
+# ============================================================================
+
+config router static
+    edit 1
+        set gateway 192.168.118.1
+        set device port2
+    end
+
+# View routing table
+get router info routing-table all
+
+# ============================================================================
+# SECTION 7: DNS CONFIGURATION
+# ============================================================================
+
+config system dns
+    set primary 8.8.8.8
+    set secondary 8.8.4.4
+end
+
+# ============================================================================
+# SECTION 8: CONNECTIVITY TESTING
+# ============================================================================
+
+# Ping management interface
+execute ping 192.168.139.131
+
+# Ping internet (Google DNS)
+execute ping 8.8.8.8
+
+# Ping by hostname
+execute ping google.com
+
+# Extended ping with options
+execute ping-options source port1
+execute ping 8.8.8.8
+
+# Traceroute
+execute traceroute 8.8.8.8
+
+# ============================================================================
+# SECTION 9: FIREWALL POLICY COMMANDS
+# ============================================================================
+
+# View all firewall policies
+show firewall policy
+
+# View specific policy by ID
+show firewall policy 1
+
+# Check policy statistics
+diagnose firewall iprope show 100004 1
+
+# ============================================================================
+# SECTION 10: DoS POLICY COMMANDS
+# ============================================================================
+
+# View DoS policies
+show firewall DoS-policy
+
+# View DoS statistics
+diagnose ips anomaly list
+
+# ============================================================================
+# SECTION 11: LOGGING & DEBUGGING
+# ============================================================================
+
+# View real-time traffic logs
+diagnose debug flow filter addr 192.168.205.10
+diagnose debug flow show console enable
+diagnose debug enable
+
+# Disable debug
+diagnose debug disable
+diagnose debug reset
+
+# Check system resources
+get system performance status
+get system performance top
+
+# View current sessions
+diagnose sys session list | head -20
+
+# View session count
+diagnose sys session stat
+
+# ============================================================================
+# SECTION 12: SYSTEM INFORMATION
+# ============================================================================
+
+# Show system info
+get system status
+
+# Show hardware info
+get hardware status
+
+# Show CPU/memory
+get system performance status
+
+# Show uptime
+diagnose sys process plist
+
+# ============================================================================
+# SECTION 13: BACKUP & RESTORE
+# ============================================================================
+
+# Backup config to TFTP
+execute backup config tftp <filename> <tftp-server-ip>
+
+# Backup via management interface
+execute backup config management-station <password>
+
+# Show running config
+show full-configuration
+
+# ============================================================================
+# SECTION 14: USEFUL ALIASES
+# ============================================================================
+
+# Show interface IPs
+get system interface | grep -A2 "== \["
+
+# Check if URL filter is working
+diagnose webfilter fortiguard statistics
+
+################################################################################
+# END OF CLI REFERENCE
+################################################################################

